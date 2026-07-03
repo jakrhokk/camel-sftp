@@ -14,7 +14,7 @@ mvn test
 
 ## Runtime configuration
 
-Default properties are in `/home/runner/work/camel-sftp/camel-sftp/src/main/resources/application.properties`:
+Default properties are in `src/main/resources/application.properties`:
 
 - `app.sftp.uri` - SFTP consumer endpoint
 - `app.s3.uri` - S3 producer endpoint
