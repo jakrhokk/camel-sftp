@@ -6,7 +6,9 @@ import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SftpToS3RouteBuilder extends RouteBuilder {
 
     @Override
