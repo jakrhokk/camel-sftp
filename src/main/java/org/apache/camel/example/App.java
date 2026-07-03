@@ -1,15 +1,12 @@
 package org.apache.camel.example;
 
-import org.apache.camel.main.Main;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public final class App {
+@SpringBootApplication
+public class App {
 
-    private App() {
-    }
-
-    public static void main(String[] args) throws Exception {
-        Main main = new Main();
-        main.configure().addRoutesBuilder(new SftpToS3RouteBuilder());
-        main.run(args);
+    public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
     }
 }
