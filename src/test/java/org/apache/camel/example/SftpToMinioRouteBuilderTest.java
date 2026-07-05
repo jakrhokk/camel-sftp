@@ -11,31 +11,31 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
-class SftpToS3RouteBuilderTest extends CamelTestSupport {
+class SftpToMinioRouteBuilderTest extends CamelTestSupport {
 
     @Override
     protected Properties useOverridePropertiesWithPropertiesComponent() {
         Properties properties = new Properties();
         properties.put("app.sftp.uri", "direct:start");
-        properties.put("app.s3.uri", "mock:s3");
-        properties.put("app.s3.bucket-name", "test-bucket");
+        properties.put("app.minio.uri", "mock:minio");
+        properties.put("app.minio.bucket-name", "test-bucket");
         properties.put("app.amqp.uri", "mock:amqp");
         return properties;
     }
 
     @Override
     protected org.apache.camel.builder.RouteBuilder createRouteBuilder() {
-        return new SftpToS3RouteBuilder();
+        return new SftpToMinioRouteBuilder();
     }
 
     @Test
-    void shouldMarshalAndPublishEventAfterS3Store() throws Exception {
-        MockEndpoint s3 = getMockEndpoint("mock:s3");
+    void shouldMarshalAndPublishEventAfterMinioStore() throws Exception {
+        MockEndpoint minio = getMockEndpoint("mock:minio");
         MockEndpoint amqp = getMockEndpoint("mock:amqp");
 
-        s3.expectedMessageCount(1);
-        s3.expectedHeaderReceived("CamelAwsS3Key", "example.txt.json");
-        s3.expectedBodiesReceived("{\"sourceFileName\":\"example.txt\",\"payload\":\"hello world\"}");
+        minio.expectedMessageCount(1);
+        minio.expectedHeaderReceived("CamelAwsS3Key", "example.txt.json");
+        minio.expectedBodiesReceived("{\"sourceFileName\":\"example.txt\",\"payload\":\"hello world\"}");
 
         amqp.expectedMessageCount(1);
         amqp.expectedBodiesReceived("{\"bucket\":\"test-bucket\",\"key\":\"example.txt.json\",\"sourceFileName\":\"example.txt\"}");
