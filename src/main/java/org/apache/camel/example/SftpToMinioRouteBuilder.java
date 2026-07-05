@@ -9,22 +9,22 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SftpToS3RouteBuilder extends RouteBuilder {
+public class SftpToMinioRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() {
         from("{{app.sftp.uri}}")
-            .routeId("sftp-to-s3-amqp")
-            .process(this::prepareS3Payload)
+            .routeId("sftp-to-minio-amqp")
+            .process(this::prepareMinioPayload)
             .marshal().json(JsonLibrary.Jackson)
-            .setHeader("CamelAwsS3Key", exchangeProperty("s3ObjectKey"))
-            .to("{{app.s3.uri}}")
+            .setHeader("CamelAwsS3Key", exchangeProperty("minioObjectKey"))
+            .to("{{app.minio.uri}}")
             .process(this::prepareEvent)
             .marshal().json(JsonLibrary.Jackson)
             .to("{{app.amqp.uri}}");
     }
 
-    private void prepareS3Payload(Exchange exchange) {
+    private void prepareMinioPayload(Exchange exchange) {
         String fileName = exchange.getIn().getHeader(Exchange.FILE_NAME_ONLY, String.class);
         if (fileName == null || fileName.isBlank()) {
             fileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
@@ -40,7 +40,7 @@ public class SftpToS3RouteBuilder extends RouteBuilder {
         }
 
         exchange.setProperty("sourceFileName", fileName);
-        exchange.setProperty("s3ObjectKey", fileName + ".json");
+        exchange.setProperty("minioObjectKey", fileName + ".json");
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("sourceFileName", fileName);
@@ -51,8 +51,8 @@ public class SftpToS3RouteBuilder extends RouteBuilder {
 
     private void prepareEvent(Exchange exchange) {
         Map<String, Object> event = new LinkedHashMap<>();
-        event.put("bucket", exchange.getContext().resolvePropertyPlaceholders("{{app.s3.bucket-name}}"));
-        event.put("key", exchange.getProperty("s3ObjectKey", String.class));
+        event.put("bucket", exchange.getContext().resolvePropertyPlaceholders("{{app.minio.bucket-name}}"));
+        event.put("key", exchange.getProperty("minioObjectKey", String.class));
         event.put("sourceFileName", exchange.getProperty("sourceFileName", String.class));
 
         exchange.getIn().setBody(event);
